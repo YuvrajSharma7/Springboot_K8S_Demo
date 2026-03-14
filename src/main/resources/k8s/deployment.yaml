@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-boot-kubernetes
+  labels:
+    app: spring-boot-kubernetes
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-boot-kubernetes
+  template:
+    metadata:
+      labels:
+        app: spring-boot-kubernetes
+    spec:
+      containers:
+        - name: spring-boot-kubernetes
+          image: gitops-sb-k8s:1.0
+          # Use local image, don't pull from registry
+          #imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+              #Optional: health check (requires Spring Boot Actuator)
+#          readinessProbe:
+#            httpGet:
+#              path: /actuator/health
+#              port: 8080
+#            initialDelaySeconds: 20
+#            periodSeconds: 5
+#          livenessProbe:
+#            httpGet:
+#              path: /actuator/health
+#              port: 8080
+#            initialDelaySeconds: 30
+#            periodSeconds: 10
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+            requests:
+              memory: "256Mi"
+              cpu: "250m"

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-boot-kubernetes-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: spring-boot-kubernetes
+  ports:
+    - protocol: TCP
+      port: 80 # port you will access externally on localhost or via LoadBalancer IP, here we are using actuator so
+      # it must be as per readinessProbe/livenessProbe port
+      targetPort: 8080 # container port your Spring Boot app is listening on inside the container
