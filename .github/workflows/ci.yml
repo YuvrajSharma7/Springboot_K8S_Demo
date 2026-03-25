@@ -21,10 +21,13 @@ jobs:
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
-      - name: Verify Secrets are Loaded
+      - name: Verify Secrets are Loaded # We map them to env here so the shell can "see" them for the length check
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY }}
         run: |
-             echo "Access Key Length: ${#AWS_ACCESS_KEY_ID}"
-             echo "Secret Key Length: ${#AWS_SECRET_ACCESS_KEY}"
+            echo "Access Key Length: ${#AWS_ACCESS_KEY_ID}"
+            echo "Secret Key Length: ${#AWS_SECRET_ACCESS_KEY}"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
