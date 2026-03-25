@@ -43,9 +43,9 @@ jobs:
 #          aws-region: ap-south-1
 #          mask-aws-account-id: 'true' # Helps prevent logging issues
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+#      - name: Login to Amazon ECR
+#        id: login-ecr
+#        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build, tag, and push image to Amazon ECR
         env:
