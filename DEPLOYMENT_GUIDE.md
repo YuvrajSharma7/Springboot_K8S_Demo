@@ -25,7 +25,7 @@ kubectl get nodes
 
 #### CI User (for GitHub Actions — Push to ECR)
 - Create a **non-root IAM user**.
-- Assign the `AmazonEC2ContainerRegistryPowerUser` policy.
+- Assign the `AmazonEC2ContainerRegistryPowerUser & AmazonEKSClusterPolicy` policy.
 - Generate an **Access Key ID** and **Secret Access Key**.
 - Ensure there are no trailing spaces or newlines when copying these keys.
 
@@ -364,6 +364,7 @@ Once Argo CD syncs your application, it will create both the **Deployment** and 
 
 ```bash
 kubectl get svc spring-boot-kubernetes-service -n spring-boot-app
+kubectl describe svc spring-boot-kubernetes-service -n spring-boot-app
 ```
 
 ### Access the App:
@@ -375,6 +376,65 @@ http://<EXTERNAL-IP>:8080
 ```
 
 ---
+
+It is perfectly normal for the **EXTERNAL-IP** to stay in for **2 to 5 minutes**. When you set a service to LoadBalancer, Kubernetes sends a request to AWS to "rent" a physical Load Balancer (ELB/NLB). AWS then has to provision the hardware, assign it an IP/DNS, and report it back to your cluster.
+
+However, if it stays pending for more than 5 minutes, there is usually a configuration "blockage." Here is how to diagnose and fix it.
+
+### 1\. The "Describe" Command (The Truth Teller)
+
+The best way to see why AWS is struggling to create the balancer is to look at the service's internal events. Run this:
+
+```bash
+kubectl describe svc spring-boot-kubernetes-service
+```
+Scroll to the bottom to the **Events** section.
+
+*   **If you see "Successfully created load balancer":** It means the DNS name is coming any second.
+
+*   **If you see "Error creating load balancer":** It will tell you exactly why. Common errors include:
+
+   *   _Could not find any suitable subnets:_ You need to tag your VPC subnets so EKS knows where to put the balancer.
+
+   *   _AccessDenied:_ Your EKS cluster's "Node Role" doesn't have permission to talk to the AWS Elastic Load Balancing service.
+
+
+### 2\. Check for "Subnet Tagging"
+
+For AWS to automatically pick subnets for your Load Balancer, your subnets in the VPC console must have specific tags. If you created the EKS cluster manually or with a custom VPC, check your **Public Subnets**:
+
+**Required Tag:**
+
+*   **Key:** kubernetes.io/role/elb
+
+*   **Value:** 1
+
+
+### 3\. Check for the "AWS Load Balancer Controller"
+
+In newer versions of EKS, you often need the **AWS Load Balancer Controller** installed as a pod in your cluster to manage these requests.
+
+Check if it is running:
+```bash
+kubectl get deployment -n kube-system aws-load-balancer-controller
+```
+If this command returns Error from server (NotFound), you might need to install the controller via Helm. Without this controller, the "LoadBalancer" type sometimes fails to trigger the AWS API.
+
+### 4\. Temporary Workaround
+
+If you need to access the app **right now** and don't want to wait for the LoadBalancer fix, use **Port Forwarding**:
+```bash
+kubectl port-forward svc/spring-boot-kubernetes-service 8082:8080
+```
+_Keep that terminal open and visit http://localhost:8082 in your browser._
+
+### Summary Checklist
+
+1.  Run kubectl describe svc ... and check the **Events**.
+
+2.  Verify that your EKS nodes are in **Public Subnets** if you want a public IP.
+
+3.  Ensure your IAM User/Role has ElasticLoadBalancingFullAccess.
 
 ## Appendix: Summary of All Changes
 
