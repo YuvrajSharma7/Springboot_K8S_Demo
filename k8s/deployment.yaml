@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: spring-boot-kubernetes
-          image: 046267061397.dkr.ecr.ap-south-1.amazonaws.com/gitops-k8s-repo:249394e606044167f502ee44e7d235fefbdfa1dd
+          image: 046267061397.dkr.ecr.ap-south-1.amazonaws.com/gitops-k8s-repo:741b050df6941c241cf3b76f15ba92c46d78d297
           # Use local image, don't pull from registry
           #imagePullPolicy: Never
           ports:
