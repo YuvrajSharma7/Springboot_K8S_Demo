@@ -33,7 +33,7 @@ jobs:
         run: |
           AWS_ACCESS_KEY_ID=${{ secrets.ACCESS_KEY }} \
           AWS_SECRET_ACCESS_KEY=${{ secrets.SECRET_ACCESS_KEY }} \
-          aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+          aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 046267061397.dkr.ecr.ap-south-1.amazonaws.com
 
 #      - name: Configure AWS Credentials
 #        uses: aws-actions/configure-aws-credentials@v4
@@ -49,7 +49,7 @@ jobs:
 
       - name: Build, tag, and push image to Amazon ECR
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REGISTRY: 046267061397.dkr.ecr.ap-south-1.amazonaws.com
           ECR_REPOSITORY: gitops-k8s-repo
           IMAGE_TAG: ${{ github.sha }}
         run: |
