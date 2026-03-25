@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: spring-boot-kubernetes
-          image: gitops-sb-k8s:${{ github.sha }}
+          image: 046267061397.dkr.ecr.ap-south-1.amazonaws.com/gitops-k8s-repo:e8bc1fda6e55789b2a17e9ad0915d8ef5c013cc8
           # Use local image, don't pull from registry
           #imagePullPolicy: Never
           ports:
