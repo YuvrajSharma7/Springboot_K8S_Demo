@@ -31,13 +31,9 @@ jobs:
 
       - name: Login to Amazon ECR (Direct Method)
         run: |
-        # We pass the secrets directly into the AWS CLI environment for this one command
           AWS_ACCESS_KEY_ID=${{ secrets.ACCESS_KEY }} \
           AWS_SECRET_ACCESS_KEY=${{ secrets.SECRET_ACCESS_KEY }} \
           aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
-          # Note: We still need the registry URL. If the previous step failed,
-          # replace the variable above with your actual ECR URL:
-          # e.g., 123456789012.dkr.ecr.ap-south-1.amazonaws.com
 
 #      - name: Configure AWS Credentials
 #        uses: aws-actions/configure-aws-credentials@v4
