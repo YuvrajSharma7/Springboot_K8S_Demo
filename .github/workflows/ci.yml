@@ -2,9 +2,10 @@ name: Build and Push to ECR
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main","test" ]
 
 permissions:
+  id-token: write   # Required for OIDC
   contents: write  # This allows the bot to push commits
 
 jobs:
