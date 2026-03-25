@@ -56,12 +56,12 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           
-      # The GitOps "Hand-off": Update the manifest repo with the new tag
+      # The GitOps "Hand-off": Update the manifest repo with the new tag so that ArgoCD can pick it up and deploy the new image
       - name: Update Deployment Manifest
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          sed -i "s|image:.*|image: ${{ steps.login-ecr.outputs.registry }}/my-spring-boot-app:${{ github.sha }}|g" k8s/deployment.yaml
+          sed -i "s|image:.*|image: 046267061397.dkr.ecr.ap-south-1.amazonaws.com/gitops-k8s-repo:${{ github.sha }}|g" k8s/deployment.yaml
           git add k8s/deployment.yaml
           git commit -m "Update image tag to ${{ github.sha }}"
           git push
