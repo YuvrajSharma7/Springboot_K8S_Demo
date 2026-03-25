@@ -4,6 +4,9 @@ on:
   push:
     branches: [ "main" ]
 
+permissions:
+  contents: write  # This allows the bot to push commits
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
