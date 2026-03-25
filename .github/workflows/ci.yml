@@ -29,13 +29,23 @@ jobs:
             echo "Access Key Length: ${#AWS_ACCESS_KEY_ID}"
             echo "Secret Key Length: ${#AWS_SECRET_ACCESS_KEY}"
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.ACCESS_KEY }} // from github actions secrets; secrets & variables->actions->repository;must be a non root user; AmazonEC2ContainerRegistryPowerUser role is required for this access key
-          aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }} //from github actions secrets; secrets & variables->actions->repository
-          aws-region: ap-south-1
-          mask-aws-account-id: 'true' # Helps prevent logging issues
+      - name: Login to Amazon ECR (Direct Method)
+        run: |
+        # We pass the secrets directly into the AWS CLI environment for this one command
+          AWS_ACCESS_KEY_ID=${{ secrets.ACCESS_KEY }} \
+          AWS_SECRET_ACCESS_KEY=${{ secrets.SECRET_ACCESS_KEY }} \
+          aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+          # Note: We still need the registry URL. If the previous step failed,
+          # replace the variable above with your actual ECR URL:
+          # e.g., 123456789012.dkr.ecr.ap-south-1.amazonaws.com
+
+#      - name: Configure AWS Credentials
+#        uses: aws-actions/configure-aws-credentials@v4
+#        with:
+#          aws-access-key-id: ${{ secrets.ACCESS_KEY }} // from github actions secrets; secrets & variables->actions->repository;must be a non root user; AmazonEC2ContainerRegistryPowerUser role is required for this access key
+#          aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }} //from github actions secrets; secrets & variables->actions->repository
+#          aws-region: ap-south-1
+#          mask-aws-account-id: 'true' # Helps prevent logging issues
 
       - name: Login to Amazon ECR
         id: login-ecr
