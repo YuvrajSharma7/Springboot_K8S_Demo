@@ -24,7 +24,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.ACCESS_KEY }} //from github actions secrets; secrets & variables->actions->repository; AmazonEC2ContainerRegistryPowerUser role is required for this access key
+          aws-access-key-id: ${{ secrets.ACCESS_KEY }} // from github actions secrets; secrets & variables->actions->repository; AmazonEC2ContainerRegistryPowerUser role is required for this access key
           aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY }} //from github actions secrets; secrets & variables->actions->repository
           aws-region: ap-south-1
 
