@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: spring-boot-kubernetes-service
 spec:
-  type: LoadBalancer
+  type: NodePort
   selector:
     app: spring-boot-kubernetes
   ports:
