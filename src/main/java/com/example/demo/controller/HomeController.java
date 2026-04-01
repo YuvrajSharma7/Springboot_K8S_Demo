@@ -11,6 +11,6 @@ public class HomeController {
     @GetMapping("/")
     public String healthCheck() {
         log.info("Home controller called");
-        return "Welcome!";
+        return "Welcome!" ;
     }
 }
