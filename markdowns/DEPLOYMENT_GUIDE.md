@@ -323,6 +323,11 @@ In the Argo CD UI:
 9. Click **Create**.
 
 ---
+### 4.7 See AgroCD in Action
+- After creating the application, Argo CD will automatically sync and deploy the manifests from the `k8s/` folder.
+- You can monitor the deployment status in the Argo CD UI. It will show you when the application is healthy and synced.
+- If you make changes to the Kubernetes manifests in the `k8s/` folder and push (only to branches mentioned in ci.yml) them to GitHub, Argo CD will detect the changes and automatically apply them to the cluster.
+
 
 ## Step 5: EKS CLI Troubleshooting
 
