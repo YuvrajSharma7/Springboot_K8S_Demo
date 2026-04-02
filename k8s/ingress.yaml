@@ -8,6 +8,7 @@ metadata:
     # If using AWS ALB:
     # alb.ingress.kubernetes.io/scheme: internet-facing
 spec:
+  ingressClassName: nginx
   rules:
     - host: myapp.test.com  # Your custom domain
       http:
