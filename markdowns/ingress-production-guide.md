@@ -81,6 +81,19 @@ spec:
               number: 8080
 ```
 
+```
+# Make sure to add the appropriate annotation based on the Ingress Controller you choose.
+# For NGINX, use `kubernetes.io/ingress.class: nginx`. For AWS ALB, use `alb.ingress.kubernetes.io/scheme: internet-facing`.
+# Check the error with below command
+kubectl describe svc ingress-nginx-controller -n ingress-nginx
+# If you see an error about the load balancer scheme, you can fix it with:
+kubectl annotate service ingress-nginx-controller -n ingress-nginx --overwrite \
+service.beta.kubernetes.io/aws-load-balancer-scheme=internet-facing
+```
+Why did this happen?
+The manifest you used (.../provider/aws/deploy.yaml) sometimes contains a "Network Load Balancer" (NLB)
+configuration that triggers the AWS Load Balancer Controller to look for internal subnets by default 
+if it's not explicitly told otherwise.
 ---
 
 ## 🏗️ Production Comparison: Service vs Ingress
@@ -108,6 +121,71 @@ kubectl describe ingress spring-boot-ingress
 # Access your app using the Ingress address
 curl http://<ingress-address>/
 ```
+### Common Issues and Fixes
+| Error Message | Cause | Fix |
+|---------|------------------------|---------|
+| **0 match VPC and tags: [internal-elb]** | AWS is looking for internal subnets | Add service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing annotation.|
+
+
+#### Healthy Ingress after proper annotation
+![image info](img.png)
+
+---
+Error Message,Cause,Fix
+0 match VPC and tags: [internal-elb],AWS is looking for internal subnets,Add service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing annotation.
+---
+### 🛠️ The Fix: Update Service Annotations
+Option A: Via Command Line (Fastest)
+Run this command in your terminal:
+```bash
+kubectl annotate service ingress-nginx-controller -n ingress-nginx --overwrite \
+service.beta.kubernetes.io/aws-load-balancer-scheme=internet-facing
+```
+Option B: Via YAML (Permanent)
+If you are managing the controller via a manifest, ensure the metadata.annotations block includes:
+```yaml
+metadata:
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+```
+### Final Connectivity Verification
+Once the EXTERNAL-IP shows a long AWS DNS name (e.g., k8s-ingressn-7ddea...ap-south-1.elb.amazonaws.com), follow these steps to access your application.
+
+Step 1: Verify Ingress Mapping
+Ensure the Ingress "Rule" has successfully inherited the address from the "Controller":
+```bash
+kubectl get ingress
+```
+xpected Output: The ADDRESS column should now match your AWS ELB DNS.
+
+Step 2: Test with Host Spoofing (CLI)
+Since myapp.test.com is a private/random domain, use curl to send the correct Host Header:
+```bash
+curl -i -H "Host: myapp.test.com" http://<YOUR-AWS-ELB-DNS-ADDRESS>
+```
+Step 3: Browser Access (Local DNS)
+To view the app in a web browser, map the domain to the Load Balancer IP locally on your laptop:
+
+Find the IP: nslookup <YOUR-AWS-ELB-DNS-ADDRESS>
+
+Edit Hosts File:
+
+Windows: C:\Windows\System32\drivers\etc\hosts
+
+Mac/Linux: /etc/hosts
+
+Add Entry:
+```
+<IP-FROM-NSLOOKUP>  myapp.test.com
+```
+Now you can access http://myapp.test.com in your browser and see your Spring Boot app running through the Ingress!
+
+| Resource | Status Check | Success Criteria |
+|---------|------------------------|---------|
+| **Controller Pod** | kubectl get pods -n ingress-nginx | 1/1 Running|
+| **Controller Svc** | kubectl get svc -n ingress-nginx | EXTERNAL-IP is an AWS DNS name |
+| **Controller Pod** | kubectl get ingress | CLASS is nginx and ADDRESS is populated |
 
 ---
 
